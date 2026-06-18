@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MiPrimerMVC.Data;
@@ -5,6 +6,7 @@ using MiPrimerMVC.Models;
 
 namespace MiPrimerMVC.Controllers;
 
+[Authorize]  // OWASP: protección de rutas — solo usuarios autenticados
 public class ProductoController : Controller
 {
     private readonly ApplicationDbContext _context;
