@@ -1,22 +1,24 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using MiPrimerMVC.Data;
 using MiPrimerMVC.Models;
 
 namespace MiPrimerMVC.Controllers;
 
 public class ProductoController : Controller
 {
-    // Lista estática en memoria para simular una base de datos
-    private static readonly List<Producto> _productos = new List<Producto>
+    private readonly ApplicationDbContext _context;
+
+    public ProductoController(ApplicationDbContext context)
     {
-        new Producto { Id = 1, Nombre = "Laptop Dell Inspiron", Precio = 749.99m, Descripcion = "Intel i5, 8GB RAM, 256GB SSD", Stock = 15 },
-        new Producto { Id = 2, Nombre = "Mouse Gamer RGB", Precio = 29.99m, Descripcion = "Mouse ergonómico con luces led", Stock = 50 },
-        new Producto { Id = 3, Nombre = "Teclado Mecánico Redragon", Precio = 59.99m, Descripcion = "Teclado layout español, switches azules", Stock = 30 }
-    };
+        _context = context;
+    }
 
     // GET: /Producto/Index
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        return View(_productos);
+        var productos = await _context.Productos.ToListAsync();
+        return View(productos);
     }
 
     // GET: /Producto/Create
@@ -28,32 +30,26 @@ public class ProductoController : Controller
     // POST: /Producto/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Create(Producto producto)
+    public async Task<IActionResult> Create(Producto producto)
     {
         if (ModelState.IsValid)
         {
-            // Asignar un ID auto-incremental simple
-            producto.Id = _productos.Any() ? _productos.Max(p => p.Id) + 1 : 1;
-            _productos.Add(producto);
-            
-            // Redireccionar al listado de productos
+            _context.Add(producto);
+            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
-
-        // Si el modelo no es válido (validación fallida), regresamos la misma vista
-        // con el modelo y los errores detectados por Data Annotations en el Server-Side
         return View(producto);
     }
 
     // GET: /Producto/Delete/5
-    public IActionResult Delete(int? id)
+    public async Task<IActionResult> Delete(int? id)
     {
         if (id == null)
         {
             return NotFound();
         }
 
-        var producto = _productos.FirstOrDefault(p => p.Id == id);
+        var producto = await _context.Productos.FirstOrDefaultAsync(m => m.Id == id);
         if (producto == null)
         {
             return NotFound();
@@ -65,12 +61,13 @@ public class ProductoController : Controller
     // POST: /Producto/Delete/5
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
-    public IActionResult DeleteConfirmed(int id)
+    public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        var producto = _productos.FirstOrDefault(p => p.Id == id);
+        var producto = await _context.Productos.FindAsync(id);
         if (producto != null)
         {
-            _productos.Remove(producto);
+            _context.Productos.Remove(producto);
+            await _context.SaveChangesAsync();
         }
         return RedirectToAction(nameof(Index));
     }
