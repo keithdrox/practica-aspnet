@@ -1,0 +1,77 @@
+@model MiPrimerMVC.Models.Producto
+
+@{
+    ViewData["Title"] = "Nuevo Producto";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="d-flex align-items-center mb-3 pb-2 border-bottom">
+                <a asp-action="Index" class="btn btn-outline-secondary btn-sm me-3">
+                    <i class="bi bi-arrow-left"></i> Volver
+                </a>
+                <div>
+                    <h1 class="h3 fw-bold text-primary mb-1">Registrar Nuevo Producto</h1>
+                    <p class="text-muted small mb-0">Complete el formulario para registrar un producto en el sistema.</p>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-body p-4">
+                    <!-- Formulario de creación de Producto -->
+                    <form asp-action="Create" method="post" id="createProductForm">
+                        <!-- Token de seguridad AntiForgery (Razor inyecta esto automáticamente, pero lo explicitamos para cumplir la directiva) -->
+                        @Html.AntiForgeryToken()
+
+                        <!-- Resumen de validaciones a nivel de modelo -->
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3" id="validationSummary"></div>
+
+                        <!-- Nombre -->
+                        <div class="mb-3">
+                            <label asp-for="Nombre" class="form-label fw-semibold"></label>
+                            <input asp-for="Nombre" class="form-control" placeholder="Ej. Monitor LG 27''" id="nombreInput" />
+                            <span asp-validation-for="Nombre" class="text-danger small" id="nombreError"></span>
+                        </div>
+
+                        <!-- Descripción -->
+                        <div class="mb-3">
+                            <label asp-for="Descripcion" class="form-label fw-semibold"></label>
+                            <textarea asp-for="Descripcion" class="form-control" rows="3" placeholder="Detalles o especificaciones del producto..." id="descripcionInput"></textarea>
+                            <span asp-validation-for="Descripcion" class="text-danger small" id="descripcionError"></span>
+                        </div>
+
+                        <div class="row">
+                            <!-- Precio -->
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Precio" class="form-label fw-semibold"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input asp-for="Precio" class="form-control" placeholder="0.00" type="number" step="0.01" id="precioInput" />
+                                </div>
+                                <span asp-validation-for="Precio" class="text-danger small" id="precioError"></span>
+                            </div>
+
+                            <!-- Stock -->
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Stock" class="form-label fw-semibold"></label>
+                                <input asp-for="Stock" class="form-control" placeholder="0" type="number" id="stockInput" />
+                                <span asp-validation-for="Stock" class="text-danger small" id="stockError"></span>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg shadow-sm" id="submitBtn">
+                                <i class="bi bi-save"></i> Guardar Producto
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

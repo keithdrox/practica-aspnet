@@ -1,0 +1,84 @@
+@model MiPrimerMVC.Models.Producto
+
+@{
+    ViewData["Title"] = "Eliminar Producto";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="d-flex align-items-center mb-3 pb-2 border-bottom">
+                <a asp-action="Index" class="btn btn-outline-secondary btn-sm me-3">
+                    <i class="bi bi-arrow-left"></i> Volver
+                </a>
+                <div>
+                    <h1 class="h3 fw-bold text-danger mb-1">Confirmar Eliminación</h1>
+                    <p class="text-muted small mb-0">¿Está seguro de que desea eliminar este producto del sistema?</p>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0 rounded-3 overflow-hidden">
+                <div class="bg-danger-subtle p-3 border-bottom border-danger-subtle">
+                    <span class="text-danger fw-semibold"><i class="bi bi-exclamation-triangle-fill"></i> Esta acción no se puede deshacer.</span>
+                </div>
+                <div class="card-body p-4">
+                    <h4 class="fw-bold text-primary mb-3">Detalles del Producto</h4>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle">
+                            <tbody>
+                                <tr>
+                                    <th class="bg-light fw-semibold" style="width: 35%;">ID</th>
+                                    <td>@Model.Id</td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light fw-semibold">Nombre</th>
+                                    <td class="fw-semibold">@Model.Nombre</td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light fw-semibold">Descripción</th>
+                                    <td class="text-muted">@(string.IsNullOrEmpty(Model.Descripcion) ? "Sin descripción" : Model.Descripcion)</td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light fw-semibold">Precio</th>
+                                    <td class="fw-bold text-success">@Model.Precio.ToString("C")</td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light fw-semibold">Stock</th>
+                                    <td>
+                                        @if (Model.Stock == 0)
+                                        {
+                                            <span class="badge bg-danger rounded-pill px-3">Sin stock</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-info text-dark rounded-pill px-3">@Model.Stock unids.</span>
+                                        }
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Formulario de confirmación de eliminación -->
+                    <form asp-action="Delete" method="post" id="deleteProductForm" class="mt-4">
+                        <!-- Token de seguridad AntiForgery para protección CSRF -->
+                        @Html.AntiForgeryToken()
+
+                        <!-- Id del producto a eliminar -->
+                        <input type="hidden" asp-for="Id" />
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger btn-lg shadow-sm" id="confirmDeleteBtn">
+                                <i class="bi bi-trash-fill"></i> Sí, Eliminar Producto
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-secondary" id="cancelDeleteBtn">
+                                Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

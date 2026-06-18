@@ -1,0 +1,78 @@
+@model IEnumerable<MiPrimerMVC.Models.Producto>
+
+@{
+    ViewData["Title"] = "Listado de Productos";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h1 class="display-5 fw-bold text-primary mb-1"><i class="bi bi-box-seam"></i> Catálogo de Productos</h1>
+            <p class="text-muted mb-0">Gestión de inventario y precios de productos.</p>
+        </div>
+        <a asp-action="Create" class="btn btn-success btn-lg shadow-sm">
+            <i class="bi bi-plus-circle"></i> Nuevo Producto
+        </a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center py-5 shadow-sm rounded-3" role="alert">
+            <h4 class="alert-heading fw-bold mb-2">No hay productos registrados</h4>
+            <p class="mb-0">Haz clic en el botón "Nuevo Producto" para registrar el primero en el sistema.</p>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0 align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th class="ps-4" style="width: 80px;">ID</th>
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th class="text-end" style="width: 150px;">Precio</th>
+                                <th class="text-center" style="width: 150px;">Stock</th>
+                                <th class="text-center" style="width: 150px;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="ps-4 fw-bold text-muted">@item.Id</td>
+                                    <td class="fw-semibold text-dark">@item.Nombre</td>
+                                    <td class="text-muted">@(string.IsNullOrEmpty(item.Descripcion) ? "Sin descripción" : item.Descripcion)</td>
+                                    <td class="text-end fw-bold text-success pe-4">
+                                        @item.Precio.ToString("C")
+                                    </td>
+                                    <td class="text-center">
+                                        @if (item.Stock == 0)
+                                        {
+                                            <span class="badge bg-danger rounded-pill px-3 py-2">Sin stock</span>
+                                        }
+                                        else if (item.Stock < 10)
+                                        {
+                                            <span class="badge bg-warning text-dark rounded-pill px-3 py-2">@item.Stock unids.</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-info text-dark rounded-pill px-3 py-2">@item.Stock unids.</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger btn-sm shadow-sm" id="delete-btn-@item.Id">
+                                            <i class="bi bi-trash"></i> Eliminar
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>
