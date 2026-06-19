@@ -1,28 +1,42 @@
 <?php
+require_once __DIR__ . '/includes/security_headers.php';
 require_once __DIR__ . '/config/database.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Generar token CSRF
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 $error = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    // Verificar token CSRF
+    if (!isset($_POST['csrf_token']) ||
+        !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+        die('Token CSRF inválido.');
+    }
+
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
 
     $pdo = getPDOConnection();
-    $stmt = $pdo->prepare('SELECT "Id", "NombreUsuario", "Email", "PasswordHash" FROM "Usuarios" WHERE "Email" = :email');
+    $stmt = $pdo->prepare(
+        'SELECT "Id", "NombreUsuario", "Email", "PasswordHash"
+         FROM "Usuarios" WHERE "Email" = :email'
+    );
     $stmt->bindValue(':email', $email, PDO::PARAM_STR);
     $stmt->execute();
     $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($usuario && password_verify($password, $usuario['PasswordHash'])) {
         session_regenerate_id(true);
-
-        $_SESSION['user_id'] = $usuario['Id'];
+        $_SESSION['user_id']   = $usuario['Id'];
         $_SESSION['user_name'] = $usuario['NombreUsuario'];
-
         header('Location: /practica-php/productos/index.php');
         exit;
     } else {
@@ -48,6 +62,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php endif; ?>
 
     <form method="post" action="login.php">
+        <input type="hidden" name="csrf_token"
+               value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
+
         <label>Correo Electrónico</label>
         <input type="email" name="email" required>
 

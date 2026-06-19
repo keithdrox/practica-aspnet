@@ -1,17 +1,30 @@
 <?php
+require_once __DIR__ . '/includes/security_headers.php';
 require_once __DIR__ . '/config/database.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Generar token CSRF
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 $errores = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    // Verificar token CSRF
+    if (!isset($_POST['csrf_token']) ||
+        !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+        die('Token CSRF inválido.');
+    }
+
     $nombreUsuario = trim($_POST['nombre_usuario'] ?? '');
-    $email = trim($_POST['email'] ?? '');
-    $password = $_POST['password'] ?? '';
-    $confirmar = $_POST['confirmar_password'] ?? '';
+    $email         = trim($_POST['email'] ?? '');
+    $password      = $_POST['password'] ?? '';
+    $confirmar     = $_POST['confirmar_password'] ?? '';
 
     if ($nombreUsuario === '' || $email === '' || $password === '') {
         $errores[] = 'Todos los campos son obligatorios.';
@@ -26,7 +39,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($errores)) {
         $pdo = getPDOConnection();
 
-        $check = $pdo->prepare('SELECT "Id" FROM "Usuarios" WHERE "Email" = :email');
+        $check = $pdo->prepare(
+            'SELECT "Id" FROM "Usuarios" WHERE "Email" = :email'
+        );
         $check->bindValue(':email', $email, PDO::PARAM_STR);
         $check->execute();
 
@@ -36,11 +51,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $hash = password_hash($password, PASSWORD_ARGON2ID);
 
             $insert = $pdo->prepare(
-                'INSERT INTO "Usuarios" ("NombreUsuario", "Email", "PasswordHash", "FechaRegistro") VALUES (:nombre, :email, :hash, NOW())'
+                'INSERT INTO "Usuarios" ("NombreUsuario", "Email", "PasswordHash", "FechaRegistro")
+                 VALUES (:nombre, :email, :hash, NOW())'
             );
             $insert->bindValue(':nombre', $nombreUsuario, PDO::PARAM_STR);
-            $insert->bindValue(':email', $email, PDO::PARAM_STR);
-            $insert->bindValue(':hash', $hash, PDO::PARAM_STR);
+            $insert->bindValue(':email',  $email,         PDO::PARAM_STR);
+            $insert->bindValue(':hash',   $hash,          PDO::PARAM_STR);
             $insert->execute();
 
             header('Location: /practica-php/login.php?registrado=1');
@@ -63,6 +79,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php endforeach; ?>
 
     <form method="post" action="register.php">
+        <input type="hidden" name="csrf_token"
+               value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
+
         <label>Nombre de Usuario</label>
         <input type="text" name="nombre_usuario" required>
 
