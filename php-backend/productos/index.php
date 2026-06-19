@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../includes/security_headers.php';
 require_once __DIR__ . '/../includes/auth_check.php';
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../repositories/PdoProductoRepository.php';
