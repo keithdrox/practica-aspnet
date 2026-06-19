@@ -1,0 +1,25 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+# NuGet
+*.nupkg
+packages/
+
+# Librerías frontend (se restauran con npm/bower)
+wwwroot/lib/
+
+# Variables de entorno y secretos
+appsettings.Development.json
+*.env
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# PHP
+vendor/
+.phpunit.cache
